@@ -5,7 +5,6 @@ import {FunctionsClient} from "@chainlink/contracts@1.2.0/src/v0.8/functions/v1_
 import {ConfirmedOwner} from "@chainlink/contracts@1.2.0/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {FunctionsRequest} from "@chainlink/contracts@1.2.0/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
-
 contract Storage is FunctionsClient, ConfirmedOwner {
     using FunctionsRequest for FunctionsRequest.Request;
 
@@ -19,46 +18,39 @@ contract Storage is FunctionsClient, ConfirmedOwner {
 
     event Response(bytes32 indexed requestId, bytes response, bytes err);
 
-     // Router address - Hardcoded for Amoy
-     address router= 0xC22a79eBA640940ABB6dF0f7982cc119578E11De;
-
-      bytes32 donID =
+    // Router address - Hardcoded for Amoy
+    address router = 0xC22a79eBA640940ABB6dF0f7982cc119578E11De;
+    bytes32 donID =
         0x66756e2d706f6c79676f6e2d616d6f792d310000000000000000000000000000;
-
-        uint32 gasLimit = 300000;
-
-
-
-    constructor(
-       
-    ) FunctionsClient(router) ConfirmedOwner(msg.sender) {}
-
+    uint32 gasLimit = 300000;
+    uint64 subscriptionId = 337;
+    string public source;
 
     function increment() external {
         counter++;
     }
 
+    function updateSource( string memory _source) external{
+      source= _source;
+    }
+
     function sendRequest(
-        string memory source,
-        bytes memory encryptedSecretsUrls,
         uint8 donHostedSecretsSlotID,
-        uint64 donHostedSecretsVersion,
-        string[] memory args,
-        bytes[] memory bytesArgs,
-        uint64 subscriptionId
+        uint64 donHostedSecretsVersion
+        
     ) external onlyOwner returns (bytes32 requestId) {
+        
         FunctionsRequest.Request memory req;
+        
         req.initializeRequestForInlineJavaScript(source);
-        if (encryptedSecretsUrls.length > 0)
-            req.addSecretsReference(encryptedSecretsUrls);
-        else if (donHostedSecretsVersion > 0) {
+
+        if (donHostedSecretsVersion > 0) {
             req.addDONHostedSecrets(
                 donHostedSecretsSlotID,
                 donHostedSecretsVersion
             );
         }
-        if (args.length > 0) req.setArgs(args);
-        if (bytesArgs.length > 0) req.setBytesArgs(bytesArgs);
+        
         s_lastRequestId = _sendRequest(
             req.encodeCBOR(),
             subscriptionId,
@@ -68,10 +60,8 @@ contract Storage is FunctionsClient, ConfirmedOwner {
         return s_lastRequestId;
     }
 
-
     function sendRequestCBOR(
-        bytes memory request,
-        uint64 subscriptionId
+        bytes memory request
     ) external onlyOwner returns (bytes32 requestId) {
         s_lastRequestId = _sendRequest(
             request,
@@ -94,4 +84,7 @@ contract Storage is FunctionsClient, ConfirmedOwner {
         s_lastError = err;
         emit Response(requestId, s_lastResponse, s_lastError);
     }
+
+    constructor() FunctionsClient(router) ConfirmedOwner(msg.sender) {}
+
 }
