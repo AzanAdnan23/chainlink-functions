@@ -11,6 +11,8 @@
   "dependencies": {
     "@chainlink/env-enc": "^1.0.5",
     "@chainlink/functions-toolkit": "^0.2.7",
+    "@stellar/stellar-sdk": "^12.2.0",
+    "esm": "^3.2.25",
     "ethers": "^5.7.2"
   }
 }
