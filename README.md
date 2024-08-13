@@ -69,5 +69,5 @@ const subscriptionId = 3 // REPLACE this with your subscription ID
 3. Make a request:
 
 ```
-node src/scripts/reques.js
+node src/scripts/request.js
 ```

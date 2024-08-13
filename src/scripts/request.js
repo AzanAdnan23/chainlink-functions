@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const {
   SubscriptionManager,
+  SecretsManager,
   simulateScript,
   ResponseListener,
   ReturnType,
@@ -14,68 +15,80 @@ require("@chainlink/env-enc").config();
 
 const functionsConsumerAbi = require("../../abi/functionsClient.json");
 
-const consumerAddress = "0xf7c8a0434940ccd6d2b3576bde4214bf6653b328"; // REPLACE this with your Functions consumer address
-const subscriptionId = 3362; // REPLACE this with your subscription ID
-
-const storageAbi = require("../../abi/storage.json");
+const consumerAddress = "0x3aad85bc08ec0c161f7f1daece6f5a32ddc36d34"; // REPLACE this with your Functions consumer address
+const subscriptionId = 337; // REPLACE this with your subscription ID
 
 const makeRequestSepolia = async () => {
   // hardcoded for Ethereum Sepolia
-  const routerAddress = "0xb83E47C2bC239B3bf370bc41e1459A34b41238D0";
-  const linkTokenAddress = "0x779877A7B0D9E8603169DdbD7836e478b4624789";
-  const donId = "fun-ethereum-sepolia-1";
-  const explorerUrl = "https://sepolia.etherscan.io";
+  const routerAddress = "0xC22a79eBA640940ABB6dF0f7982cc119578E11De";
+  const linkTokenAddress = "0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904";
+  const donId = "fun-polygon-amoy-1";
+  const explorerUrl = "https://amoy.polygonscan.com";
+  const gatewayUrls = [
+    "https://01.functions-gateway.testnet.chain.link/",
+    "https://02.functions-gateway.testnet.chain.link/",
+  ];
 
   // Initialize functions settings
   const source = fs
     .readFileSync(path.resolve(__dirname, "source.js"))
     .toString();
 
-  const args = [JSON.stringify(storageAbi), consumerAddress];
+  const slotIdNumber = 0;
+  const expirationTimeMinutes = 30; // expiration time in minutes of the secrets
 
   const gasLimit = 300000;
 
   // Initialize ethers signer and provider to interact with the contracts onchain
-  const privateKey = process.env.PRIVATE_KEY; // fetch PRIVATE_KEY
+  const privateKey = process.env.PRIVATE_KEY;
   if (!privateKey)
     throw new Error(
-      "private key not provided - check your environment variables"
+      "private key not provided - check your environment variables (request)"
     );
 
-  const rpcUrl = process.env.ETHEREUM_SEPOLIA_RPC_URL; // fetch Sepolia RPC URL
+  const rpcUrl = process.env.POLYGON_AMOY_RPC_URL;
 
   if (!rpcUrl)
-    throw new Error(`rpcUrl not provided  - check your environment variables`);
+    throw new Error(
+      "rpcUrl not provided  - check your environment variables (request)"
+    );
 
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
   const wallet = new ethers.Wallet(privateKey);
   const signer = wallet.connect(provider); // create ethers signer for signing transactions
 
-  ///////// START SIMULATION ////////////
+  const secrets = {
+    privateKey: process.env.PRIVATE_KEY,
+    rpc_url: process.env.POLYGON_AMOY_RPC_URL,
+  };
 
-  console.log("Start simulation...");
+  const args = [consumerAddress];
 
-  const response = await simulateScript({
-    source: source,
-    args: args,
-    bytesArgs: [], // bytesArgs - arguments can be encoded off-chain to bytes.
-    secrets: {}, // no secrets in this example
-  });
+  // // ///////// START SIMULATION ////////////
 
-  console.log("Simulation result", response);
-  const errorString = response.errorString;
-  if (errorString) {
-    console.log(`❌ Error during simulation: `, errorString);
-  } else {
-    const returnType = ReturnType.bytes; // Adjust based on the actual response type
-    const responseBytesHexstring = response.responseBytesHexstring;
+  // console.log("Start simulation...");
 
-    if (responseBytesHexstring) {
-      const decodedResponse = decodeResult(responseBytesHexstring, returnType);
-      console.log(`✅ Decoded response to ${returnType}: `, decodedResponse);
-    }
-  }
+  // const response = await simulateScript({
+  //   source: source,
+  //   args: args,
+  //   bytesArgs: [], // bytesArgs - arguments can be encoded off-chain to bytes.
+  //   secrets: secrets, // no secrets in this example
+  // });
+
+  // console.log("Simulation result", response);
+  // const errorString = response.errorString;
+  // if (errorString) {
+  //   console.log(`❌ Error during simulation: `, errorString);
+  // } else {
+  //   const returnType = ReturnType.bytes; // Adjust based on the actual response type
+  //   const responseBytesHexstring = response.responseBytesHexstring;
+
+  //   if (responseBytesHexstring) {
+  //     const decodedResponse = decodeResult(responseBytesHexstring, returnType);
+  //     console.log(`✅ Decoded response to ${returnType}: `, decodedResponse);
+  //   }
+  // }
 
   //////// ESTIMATE REQUEST COSTS ////////
   console.log("\nEstimate request costs...");
@@ -109,6 +122,38 @@ const makeRequestSepolia = async () => {
 
   console.log("\nMake request...");
 
+  // First encrypt secrets and upload the encrypted secrets to the DON
+  const secretsManager = new SecretsManager({
+    signer: signer,
+    functionsRouterAddress: routerAddress,
+    donId: donId,
+  });
+  await secretsManager.initialize();
+
+  // Encrypt secrets and upload to DON
+  const encryptedSecretsObj = await secretsManager.encryptSecrets(secrets);
+
+  console.log(
+    `Upload encrypted secret to gateways ${gatewayUrls}. slotId ${slotIdNumber}. Expiration in minutes: ${expirationTimeMinutes}`
+  );
+  // Upload secrets
+  const uploadResult = await secretsManager.uploadEncryptedSecretsToDON({
+    encryptedSecretsHexstring: encryptedSecretsObj.encryptedSecrets,
+    gatewayUrls: gatewayUrls,
+    slotId: slotIdNumber,
+    minutesUntilExpiration: expirationTimeMinutes,
+  });
+
+  if (!uploadResult.success)
+    throw new Error(`Encrypted secrets not uploaded to ${gatewayUrls}`);
+
+  console.log(
+    `\n✅ Secrets uploaded properly to gateways ${gatewayUrls}! Gateways response: `,
+    uploadResult
+  );
+
+  const donHostedSecretsVersion = parseInt(uploadResult.version); // fetch the reference of the encrypted secrets
+
   const functionsConsumer = new ethers.Contract(
     consumerAddress,
     functionsConsumerAbi,
@@ -118,9 +163,9 @@ const makeRequestSepolia = async () => {
   // Actual transaction call
   const transaction = await functionsConsumer.sendRequest(
     source, // source
-    "0x", // user hosted secrets - encryptedSecretsUrls - empty in this example
-    0, // don hosted secrets - slot ID - empty in this example
-    0, // don hosted secrets - version - empty in this example
+    "0x", // user hosted secrets - encryptedSecretsUrls -
+    slotIdNumber, // don hosted secrets - slot ID
+    donHostedSecretsVersion, // don hosted secrets -
     args,
     [], // bytesArgs - arguments can be encoded off-chain to bytes.
     subscriptionId,
@@ -162,7 +207,7 @@ const makeRequestSepolia = async () => {
             response.requestId
           } successfully fulfilled. Cost is ${ethers.utils.formatEther(
             response.totalCostInJuels
-          )} LINK.Complete reponse: `,
+          )} LINK. Complete response: `,
           response
         );
       } else if (fulfillmentCode === FulfillmentCode.USER_CALLBACK_ERROR) {
@@ -171,7 +216,7 @@ const makeRequestSepolia = async () => {
             response.requestId
           } fulfilled. However, the consumer contract callback failed. Cost is ${ethers.utils.formatEther(
             response.totalCostInJuels
-          )} LINK.Complete reponse: `,
+          )} LINK. Complete response: `,
           response
         );
       } else {
@@ -180,7 +225,7 @@ const makeRequestSepolia = async () => {
             response.requestId
           } not fulfilled. Code: ${fulfillmentCode}. Cost is ${ethers.utils.formatEther(
             response.totalCostInJuels
-          )} LINK.Complete reponse: `,
+          )} LINK. Complete response: `,
           response
         );
       }

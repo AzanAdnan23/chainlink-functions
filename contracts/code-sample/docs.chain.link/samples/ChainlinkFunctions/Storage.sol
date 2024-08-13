@@ -9,7 +9,7 @@ import {FunctionsRequest} from "@chainlink/contracts@1.2.0/src/v0.8/functions/v1
 contract Storage is FunctionsClient, ConfirmedOwner {
     using FunctionsRequest for FunctionsRequest.Request;
 
-    uint256 public number;
+
     uint256 public counter = 0;
 
     bytes32 public s_lastRequestId;
@@ -20,17 +20,18 @@ contract Storage is FunctionsClient, ConfirmedOwner {
 
     event Response(bytes32 indexed requestId, bytes response, bytes err);
 
+
+     // Router address - Hardcoded for Amoy
+     address router= 0xC22a79eBA640940ABB6dF0f7982cc119578E11De;
+
+
+      bytes32 donID =
+        0x66756e2d706f6c79676f6e2d616d6f792d310000000000000000000000000000;
+
     constructor(
-        address router
+       
     ) FunctionsClient(router) ConfirmedOwner(msg.sender) {}
 
-    function store(uint256 num) public {
-        number = num;
-    }
-
-    function retrieve() public view returns (uint256) {
-        return number;
-    }
 
     function increment() external {
         counter++;
@@ -44,8 +45,7 @@ contract Storage is FunctionsClient, ConfirmedOwner {
         string[] memory args,
         bytes[] memory bytesArgs,
         uint64 subscriptionId,
-        uint32 gasLimit,
-        bytes32 donID
+        uint32 gasLimit
     ) external onlyOwner returns (bytes32 requestId) {
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source);
@@ -68,11 +68,11 @@ contract Storage is FunctionsClient, ConfirmedOwner {
         return s_lastRequestId;
     }
 
+
     function sendRequestCBOR(
         bytes memory request,
         uint64 subscriptionId,
-        uint32 gasLimit,
-        bytes32 donID
+        uint32 gasLimit
     ) external onlyOwner returns (bytes32 requestId) {
         s_lastRequestId = _sendRequest(
             request,

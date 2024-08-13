@@ -6,13 +6,7 @@
 	"output": {
 		"abi": [
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "router",
-						"type": "address"
-					}
-				],
+				"inputs": [],
 				"stateMutability": "nonpayable",
 				"type": "constructor"
 			},
@@ -193,38 +187,12 @@
 			},
 			{
 				"inputs": [],
-				"name": "number",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
 				"name": "owner",
 				"outputs": [
 					{
 						"internalType": "address",
 						"name": "",
 						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "retrieve",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -310,11 +278,6 @@
 						"internalType": "uint32",
 						"name": "gasLimit",
 						"type": "uint32"
-					},
-					{
-						"internalType": "bytes32",
-						"name": "donID",
-						"type": "bytes32"
 					}
 				],
 				"name": "sendRequest",
@@ -344,11 +307,6 @@
 						"internalType": "uint32",
 						"name": "gasLimit",
 						"type": "uint32"
-					},
-					{
-						"internalType": "bytes32",
-						"name": "donID",
-						"type": "bytes32"
 					}
 				],
 				"name": "sendRequestCBOR",
@@ -359,19 +317,6 @@
 						"type": "bytes32"
 					}
 				],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "num",
-						"type": "uint256"
-					}
-				],
-				"name": "store",
-				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
@@ -424,7 +369,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"docs.chain.link/samples/ChainlinkFunctions/Storage.sol": "Storage"
+			"code-sample/docs.chain.link/samples/ChainlinkFunctions/Storage.sol": "Storage"
 		},
 		"evmVersion": "paris",
 		"libraries": {},
@@ -518,12 +463,12 @@
 				"dweb:/ipfs/QmQx9mEREaFyJGC2KpqWBqBV712NY8vUBrcqTR4RdVNBiu"
 			]
 		},
-		"docs.chain.link/samples/ChainlinkFunctions/Storage.sol": {
-			"keccak256": "0x7b9ed2756220f96cc957a740d3ab24593fda0c4c0467cae1ba162c33dc41b53f",
+		"code-sample/docs.chain.link/samples/ChainlinkFunctions/Storage.sol": {
+			"keccak256": "0xce2f8e9b1721782b88c16587c8f5cc8783a08c6315626ffe77d74902361d1c2b",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://2982570b170f11e823b52cc8ff5948d4161164a2cca52d028e2778cd3e4503b3",
-				"dweb:/ipfs/QmWysXm4Kkt8wAgT6mabbJm8hy7dJzYyZTkpj3yM2iLbXh"
+				"bzz-raw://cfb3223a4073a7ee745b870da15a459bf690925bb49c068b9390b0849d3aaa0d",
+				"dweb:/ipfs/QmYbztbEy3bG77jLJBXNQ8Do8oMU8uZoi5J28vcnZxU6Yy"
 			]
 		}
 	},

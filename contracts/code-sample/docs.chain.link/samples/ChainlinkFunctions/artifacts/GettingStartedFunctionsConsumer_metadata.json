@@ -6,24 +6,13 @@
 	"output": {
 		"abi": [
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "router",
-						"type": "address"
-					}
-				],
+				"inputs": [],
 				"stateMutability": "nonpayable",
 				"type": "constructor"
 			},
 			{
 				"inputs": [],
 				"name": "EmptyArgs",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "EmptySecrets",
 				"type": "error"
 			},
 			{
@@ -127,6 +116,12 @@
 					},
 					{
 						"indexed": false,
+						"internalType": "string",
+						"name": "character",
+						"type": "string"
+					},
+					{
+						"indexed": false,
 						"internalType": "bytes",
 						"name": "response",
 						"type": "bytes"
@@ -146,6 +141,19 @@
 				"name": "acceptOwnership",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "character",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -226,86 +234,17 @@
 			{
 				"inputs": [
 					{
-						"internalType": "string",
-						"name": "source",
-						"type": "string"
-					},
-					{
-						"internalType": "bytes",
-						"name": "encryptedSecretsUrls",
-						"type": "bytes"
-					},
-					{
-						"internalType": "uint8",
-						"name": "donHostedSecretsSlotID",
-						"type": "uint8"
-					},
-					{
 						"internalType": "uint64",
-						"name": "donHostedSecretsVersion",
+						"name": "subscriptionId",
 						"type": "uint64"
 					},
 					{
 						"internalType": "string[]",
 						"name": "args",
 						"type": "string[]"
-					},
-					{
-						"internalType": "bytes[]",
-						"name": "bytesArgs",
-						"type": "bytes[]"
-					},
-					{
-						"internalType": "uint64",
-						"name": "subscriptionId",
-						"type": "uint64"
-					},
-					{
-						"internalType": "uint32",
-						"name": "gasLimit",
-						"type": "uint32"
-					},
-					{
-						"internalType": "bytes32",
-						"name": "donID",
-						"type": "bytes32"
 					}
 				],
 				"name": "sendRequest",
-				"outputs": [
-					{
-						"internalType": "bytes32",
-						"name": "requestId",
-						"type": "bytes32"
-					}
-				],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "bytes",
-						"name": "request",
-						"type": "bytes"
-					},
-					{
-						"internalType": "uint64",
-						"name": "subscriptionId",
-						"type": "uint64"
-					},
-					{
-						"internalType": "uint32",
-						"name": "gasLimit",
-						"type": "uint32"
-					},
-					{
-						"internalType": "bytes32",
-						"name": "donID",
-						"type": "bytes32"
-					}
-				],
-				"name": "sendRequestCBOR",
 				"outputs": [
 					{
 						"internalType": "bytes32",
@@ -331,6 +270,7 @@
 			}
 		],
 		"devdoc": {
+			"details": "This contract uses hardcoded values and should not be used in production.",
 			"kind": "dev",
 			"methods": {
 				"handleOracleFulfillment(bytes32,bytes,bytes)": {
@@ -341,29 +281,17 @@
 						"response": "Aggregated response from the request's source code."
 					}
 				},
-				"sendRequest(string,bytes,uint8,uint64,string[],bytes[],uint64,uint32,bytes32)": {
+				"sendRequest(uint64,string[])": {
 					"params": {
-						"args": "List of arguments accessible from within the source code",
-						"bytesArgs": "Array of bytes arguments, represented as hex strings",
-						"donHostedSecretsSlotID": "Don hosted secrets slotId",
-						"donHostedSecretsVersion": "Don hosted secrets version",
-						"encryptedSecretsUrls": "Encrypted URLs where to fetch user secrets",
-						"source": "JavaScript source code",
-						"subscriptionId": "Billing ID"
-					}
-				},
-				"sendRequestCBOR(bytes,uint64,uint32,bytes32)": {
-					"params": {
-						"donID": "ID of the job to be invoked",
-						"gasLimit": "The maximum amount of gas the request can consume",
-						"request": "CBOR-encoded request data",
-						"subscriptionId": "Billing ID"
+						"args": "The arguments to pass to the HTTP request",
+						"subscriptionId": "The ID for the Chainlink subscription"
 					},
 					"returns": {
-						"requestId": "The ID of the sent request"
+						"requestId": "The ID of the request"
 					}
 				}
 			},
+			"title": "GettingStartedFunctionsConsumer",
 			"version": 1
 		},
 		"userdoc": {
@@ -372,29 +300,29 @@
 				"acceptOwnership()": {
 					"notice": "Allows an ownership transfer to be completed by the recipient."
 				},
+				"constructor": {
+					"notice": "Initializes the contract with the Chainlink router address and sets the contract owner"
+				},
 				"handleOracleFulfillment(bytes32,bytes,bytes)": {
 					"notice": "Chainlink Functions response handler called by the Functions Router during fullilment from the designated transmitter node in an OCR round."
 				},
 				"owner()": {
 					"notice": "Get the current owner"
 				},
-				"sendRequest(string,bytes,uint8,uint64,string[],bytes[],uint64,uint32,bytes32)": {
-					"notice": "Send a simple request"
-				},
-				"sendRequestCBOR(bytes,uint64,uint32,bytes32)": {
-					"notice": "Send a pre-encoded CBOR request"
+				"sendRequest(uint64,string[])": {
+					"notice": "Sends an HTTP request for character information"
 				},
 				"transferOwnership(address)": {
 					"notice": "Allows an owner to begin transferring ownership to a new address."
 				}
 			},
-			"notice": "THIS IS AN EXAMPLE CONTRACT THAT USES HARDCODED VALUES FOR CLARITY. THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE. DO NOT USE THIS CODE IN PRODUCTION.",
+			"notice": "This is an example contract to show how to make HTTP requests using Chainlink",
 			"version": 1
 		}
 	},
 	"settings": {
 		"compilationTarget": {
-			"docs.chain.link/samples/ChainlinkFunctions/Storage.sol": "FunctionsConsumerExample"
+			"code-sample/docs.chain.link/samples/ChainlinkFunctions/GettingStartedFunctionsConsumer.sol": "GettingStartedFunctionsConsumer"
 		},
 		"evmVersion": "paris",
 		"libraries": {},
@@ -488,12 +416,12 @@
 				"dweb:/ipfs/QmQx9mEREaFyJGC2KpqWBqBV712NY8vUBrcqTR4RdVNBiu"
 			]
 		},
-		"docs.chain.link/samples/ChainlinkFunctions/Storage.sol": {
-			"keccak256": "0x4fa38a690453b7625bf9ec2254d9ce0f8d4b9c6ae0bf44ec86f33fc085e0340f",
+		"code-sample/docs.chain.link/samples/ChainlinkFunctions/GettingStartedFunctionsConsumer.sol": {
+			"keccak256": "0x076d2c8f359ae02e4170b49eb57e5a2f7427f1d2ac8b4f91a9f2d369e8cfe94c",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://860fb552227baccd4b7f36e5c41df32c4a54cec6dadee679b6793a93f2ac23be",
-				"dweb:/ipfs/QmRabpveTD3hMdByrATkLv11VCBDAVWEDB4powh8roUgcY"
+				"bzz-raw://4fcc6169bc5a1a34ef66c3e99c9df04d98fb6edfa54beabc57928b6b6e3c575a",
+				"dweb:/ipfs/QmbJu5oHKVSYaUuiL5bQ3natYGQFpHG7LGY8u6fQpVwiFj"
 			]
 		}
 	},
